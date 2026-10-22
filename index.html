@@ -160,39 +160,39 @@
 
     <div id="setView">
       <div class="head">
-        <span class="title">设置</span>
+        <span class="title" id="setTitle">设置</span>
         <div class="hbtns">
           <button class="close" id="back" title="返回">‹</button>
         </div>
       </div>
       <div class="row">
-        <span class="slabel">玻璃浓度</span>
+        <span class="slabel" id="slGlass">玻璃浓度</span>
         <input type="range" id="alpha" min="15" max="85" step="5">
       </div>
       <div class="row">
-        <span class="slabel">明暗</span>
+        <span class="slabel" id="slTheme">明暗</span>
         <button class="mini" id="thLight">浅色</button>
         <button class="mini" id="thDark">深色</button>
       </div>
       <div class="row">
-        <span class="slabel">位置</span>
+        <span class="slabel" id="slPos">位置</span>
         <button class="mini sm" data-pos="top-left">左上</button>
         <button class="mini sm" data-pos="top-right">右上</button>
         <button class="mini sm" data-pos="bottom-left">左下</button>
         <button class="mini sm" data-pos="bottom-right">右下</button>
       </div>
       <div class="row">
-        <span class="slabel">提示音</span>
+        <span class="slabel" id="slChime">提示音</span>
         <button class="mini" id="sndPrev">◀</button>
         <span id="sndName"></span>
         <button class="mini" id="sndNext">▶</button>
         <button class="mini" id="sndPlay" title="试听">♪</button>
       </div>
       <div class="row">
-        <span class="slabel">音量</span>
+        <span class="slabel" id="slVol">音量</span>
         <input type="range" id="vol" min="0" max="100" step="5">
       </div>
-      <div class="foot">改动即存，无需保存</div>
+      <div class="foot" id="foot">改动即存，无需保存</div>
     </div>
   </div>
 <script>
@@ -209,6 +209,41 @@
 
   const $ = (id) => document.getElementById(id);
   const dot = $('dot'), label = $('label'), btnAway = $('btnAway'), btnHere = $('btnHere');
+
+  // i18n: follow the OS language (zh -> Chinese, everything else -> English)
+  const LANG = (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+  const T = {
+    zh: { here: '在场', away: '离开中', btnAway: '离开', btnHere: '在',
+          settings: '设置', back: '返回', glass: '玻璃浓度', theme: '明暗',
+          light: '浅色', dark: '深色', pos: '位置', tl: '左上', tr: '右上', bl: '左下', br: '右下',
+          chime: '提示音', vol: '音量', foot: '改动即存，无需保存' },
+    en: { here: 'Here', away: 'Away', btnAway: 'Away', btnHere: 'Here',
+          settings: 'Settings', back: 'Back', glass: 'Glass', theme: 'Theme',
+          light: 'Light', dark: 'Dark', pos: 'Position', tl: 'Top L', tr: 'Top R', bl: 'Bot L', br: 'Bot R',
+          chime: 'Chime', vol: 'Volume', foot: 'Changes save automatically' }
+  };
+  function applyLang() {
+    const t = T[LANG];
+    document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : 'en';
+    $('setTitle').textContent = t.settings;
+    $('back').title = t.back;
+    $('slGlass').textContent = t.glass;
+    $('slTheme').textContent = t.theme;
+    $('slPos').textContent = t.pos;
+    $('slChime').textContent = t.chime;
+    $('slVol').textContent = t.vol;
+    $('thLight').textContent = t.light;
+    $('thDark').textContent = t.dark;
+    document.querySelector('[data-pos="top-left"]').textContent = t.tl;
+    document.querySelector('[data-pos="top-right"]').textContent = t.tr;
+    document.querySelector('[data-pos="bottom-left"]').textContent = t.bl;
+    document.querySelector('[data-pos="bottom-right"]').textContent = t.br;
+    $('foot').textContent = t.foot;
+    btnAway.textContent = t.btnAway;
+    btnHere.textContent = t.btnHere;
+  }
+  applyLang();
+
   let cfg = { theme: 'light', glassAlpha: 45, position: 'top-right', sound: 0, volume: 70 };
   let sndIdx = 0;
 
@@ -228,12 +263,12 @@
 
   function render(at) {
     if (at) {
-      label.textContent = '在场';
+      label.textContent = T[LANG].here;
       dot.classList.remove('away');
       btnHere.classList.add('active');
       btnAway.classList.remove('active');
     } else {
-      label.textContent = '离开中';
+      label.textContent = T[LANG].away;
       dot.classList.add('away');
       btnAway.classList.add('active');
       btnHere.classList.remove('active');

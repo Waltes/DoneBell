@@ -4,7 +4,9 @@
 
 You send Claude Code / Codex a big task, walk away to make coffee — and come back to find it finished waiting 20 minutes ago. DoneBell fixes that: a frosted-glass floating widget that shows your presence status, chimes the moment an agent completes a reply, and re-nudges you every 5 minutes until you're back.
 
-> Windows first (v1). macOS/Linux planned.
+> Windows first (v1). macOS/Linux planned. — 界面语言自动跟随系统（中文/English）。
+
+**中文简介**：DoneBell 是一个液态玻璃风格的桌面浮窗——你给 Claude Code / Codex 派完活离开电脑后，AI 答完会立刻响铃提醒；5 分钟没回来还会再催。点「在 / 离开」切换在场状态，玻璃浓度、明暗、位置、铃声、音量都在 ⚙ 面板即改即存。界面语言自动跟随 Windows 系统语言。
 
 ## What it does
 
