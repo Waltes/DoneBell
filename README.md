@@ -25,10 +25,22 @@ You send Claude Code / Codex a big task, walk away to make coffee — and come b
 | Codex CLI | official `notify` config | `donebell init codex` |
 | Anything else | generic completion command | `donebell init` prints it |
 
+## Install (Windows)
+
+Download the latest installer from [Releases](https://github.com/Waltes/DoneBell/releases/latest):
+
+👉 **[DoneBell-Setup-0.1.0.exe](https://github.com/Waltes/DoneBell/releases/latest)**
+
+Run it, then wire your AI tools:
+
+```bash
+npx donebell init all   # auto-configures Claude Code + Codex CLI
+```
+
 ## Install & run (from source)
 
 ```bash
-git clone https://github.com/<you>/DoneBell.git
+git clone https://github.com/Waltes/DoneBell.git
 cd DoneBell
 npm install
 npx donebell init all   # wire Claude Code + Codex automatically

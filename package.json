@@ -12,6 +12,12 @@
     "dist": "electron-builder --win nsis"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Waltes/DoneBell.git"
+  },
+  "homepage": "https://github.com/Waltes/DoneBell#readme",
+  "bugs": "https://github.com/Waltes/DoneBell/issues",
   "devDependencies": {
     "electron": "^33.0.0",
     "electron-builder": "^25.1.8"
