@@ -2,3 +2,5 @@ node_modules/
 dist/
 *.log
 setround.log
+
+package-lock.json
