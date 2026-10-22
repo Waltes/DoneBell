@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>DoneBell</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  html, body { background: transparent; overflow: hidden; }
+  :root { --ga: 0.45; }
+
+  .card {
+    width: 296px;
+    height: 124px;
+    border-radius: 22px;
+    position: relative;
+    -webkit-app-region: drag;
+    background: linear-gradient(135deg,
+      rgba(255,255,255,calc(var(--ga)*1.22)) 0%,
+      rgba(255,255,255,calc(var(--ga)*0.66)) 45%,
+      rgba(255,255,255,calc(var(--ga)*0.93)) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 0.5px solid rgba(255,255,255,0.65);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.85),
+      inset 0 -1px 0 rgba(255,255,255,0.25),
+      inset 1px 0 0 rgba(255,255,255,0.35),
+      inset -1px 0 0 rgba(255,255,255,0.35);
+    padding: 12px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+                 'Segoe UI Variable Display', 'Segoe UI', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* decorative layers as real divs: pseudo-elements were re-marking the
+     header area as app-region drag despite pointer-events:none */
+  .fx { position: absolute; pointer-events: none; -webkit-app-region: no-drag; }
+  .fx.rim {
+    inset: 0;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.55));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    padding: 1px; z-index: 2;
+  }
+  .fx.sheen {
+    left: 12%; right: 12%; top: 1px; height: 40%;
+    border-radius: 22px 22px 60% 60%;
+    background: linear-gradient(rgba(255,255,255,0.28), rgba(255,255,255,0));
+    z-index: 2;
+  }
+
+  /* dark theme */
+  body.dark .card {
+    background: linear-gradient(135deg,
+      rgba(40,42,50,calc(var(--ga)*1.5)) 0%,
+      rgba(28,28,32,calc(var(--ga)*1.1)) 45%,
+      rgba(36,38,46,calc(var(--ga)*1.3)) 100%);
+  }
+  body.dark .title { color: rgba(255,255,255,0.65) !important; }
+  body.dark .label { color: #F2F4F8 !important; }
+  body.dark .close { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.75); }
+  body.dark .btn {
+    color: #E8EAF0;
+    background: rgba(255,255,255,0.10);
+    border: 0.5px solid rgba(255,255,255,0.22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  body.dark .btn:hover { background: rgba(255,255,255,0.20); }
+  body.dark .mini { color: #D8DCE4; }
+
+  .head { display: flex; align-items: center; justify-content: space-between; -webkit-app-region: no-drag; }
+  .title { font-size: 12px; font-weight: 600; letter-spacing: 0.4px; color: rgba(30, 34, 48, 0.62); }
+  .hbtns { display: flex; gap: 6px; -webkit-app-region: no-drag; }
+  .close {
+    -webkit-app-region: no-drag; pointer-events: auto;
+    width: 26px; height: 26px; border-radius: 13px; border: none; cursor: pointer;
+    background: rgba(40, 44, 60, 0.10); color: rgba(30, 34, 48, 0.55);
+    font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center;
+    transition: background .15s ease;
+  }
+  .close:hover { background: rgba(40, 44, 60, 0.20); }
+
+  .status { display: flex; align-items: center; gap: 8px; margin-top: 8px; height: 22px; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #30D158;
+    box-shadow: 0 0 6px rgba(48, 209, 88, 0.9), 0 0 14px rgba(48, 209, 88, 0.45);
+    transition: background .2s ease, box-shadow .2s ease;
+  }
+  .dot.away {
+    background: #FF9F0A;
+    box-shadow: 0 0 6px rgba(255, 159, 10, 0.9), 0 0 14px rgba(255, 159, 10, 0.45);
+  }
+  .label { font-size: 17px; font-weight: 700; color: #141C28; letter-spacing: 0.2px; }
+
+  .seg { display: flex; gap: 8px; margin-top: 10px; -webkit-app-region: no-drag; }
+  .btn {
+    flex: 1; height: 34px; border-radius: 11px; border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    color: rgba(24, 30, 44, 0.72);
+    background: rgba(255, 255, 255, 0.28);
+    border: 0.5px solid rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+    transition: all .18s ease;
+  }
+  .btn:hover { background: rgba(255, 255, 255, 0.5); }
+  .btn.active {
+    color: #FFFFFF;
+    background: linear-gradient(180deg, #3D8BFF, #0A6BFF);
+    border: 0.5px solid rgba(255,255,255,0.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 3px 10px rgba(10, 107, 255, 0.45);
+  }
+  .btn.away.active { background: linear-gradient(180deg, #FFB340, #F08A00); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 3px 10px rgba(240, 138, 0, 0.45); }
+
+  /* ===== settings view ===== */
+  #setView { display: none; }
+  .card.settings { height: 372px; }
+  .row {
+    display: flex; align-items: center; margin-top: 12px; gap: 8px;
+    -webkit-app-region: no-drag;
+  }
+  .slabel { width: 62px; font-size: 12px; font-weight: 600; color: rgba(30,34,48,0.72); }
+  body.dark .slabel { color: rgba(255,255,255,0.72); }
+  input[type=range] { flex: 1; -webkit-app-region: no-drag; accent-color: #0A6BFF; height: 18px; }
+  .mini {
+    -webkit-app-region: no-drag; border: none; cursor: pointer; font-family: inherit;
+    font-size: 11px; font-weight: 600; color: rgba(24,30,44,0.72);
+    background: rgba(255,255,255,0.28); border: 0.5px solid rgba(255,255,255,0.45);
+    border-radius: 8px; height: 26px; padding: 0 8px; transition: all .15s ease;
+  }
+  .mini:hover { background: rgba(255,255,255,0.5); }
+  .mini.on { color: #FFF; background: linear-gradient(180deg, #3D8BFF, #0A6BFF); border-color: rgba(255,255,255,0.35); }
+  .mini.sm { padding: 0 7px; min-width: 44px; }
+  #sndName { flex: 1; text-align: center; font-size: 11px; font-weight: 600; color: rgba(24,30,44,0.8); white-space: nowrap; overflow: hidden; }
+  body.dark #sndName { color: #E8EAF0; }
+  .foot { margin-top: 10px; text-align: center; font-size: 10px; color: rgba(30,34,48,0.4); }
+  body.dark .foot { color: rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="fx rim"></div>
+    <div class="fx sheen"></div>
+    <div id="mainView">
+      <div class="head">
+        <span class="title">DoneBell</span>
+        <div class="hbtns">
+          <button class="close" id="gear" title="设置">⚙</button>
+          <button class="close" id="close" title="关闭">✕</button>
+        </div>
+      </div>
+      <div class="status">
+        <span class="dot" id="dot"></span>
+        <span class="label" id="label">在场</span>
+      </div>
+      <div class="seg">
+        <button class="btn away" id="btnAway">离开</button>
+        <button class="btn" id="btnHere">在</button>
+      </div>
+    </div>
+
+    <div id="setView">
+      <div class="head">
+        <span class="title">设置</span>
+        <div class="hbtns">
+          <button class="close" id="back" title="返回">‹</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="slabel">玻璃浓度</span>
+        <input type="range" id="alpha" min="15" max="85" step="5">
+      </div>
+      <div class="row">
+        <span class="slabel">明暗</span>
+        <button class="mini" id="thLight">浅色</button>
+        <button class="mini" id="thDark">深色</button>
+      </div>
+      <div class="row">
+        <span class="slabel">位置</span>
+        <button class="mini sm" data-pos="top-left">左上</button>
+        <button class="mini sm" data-pos="top-right">右上</button>
+        <button class="mini sm" data-pos="bottom-left">左下</button>
+        <button class="mini sm" data-pos="bottom-right">右下</button>
+      </div>
+      <div class="row">
+        <span class="slabel">提示音</span>
+        <button class="mini" id="sndPrev">◀</button>
+        <span id="sndName"></span>
+        <button class="mini" id="sndNext">▶</button>
+        <button class="mini" id="sndPlay" title="试听">♪</button>
+      </div>
+      <div class="row">
+        <span class="slabel">音量</span>
+        <input type="range" id="vol" min="0" max="100" step="5">
+      </div>
+      <div class="foot">改动即存，无需保存</div>
+    </div>
+  </div>
+<script>
+  const SOUNDS = [
+    { f: 'Windows Notify System Generic.wav', n: 'System Generic' },
+    { f: 'Windows Notify.wav',                n: 'Notify' },
+    { f: 'Windows Notify Calendar.wav',       n: 'Calendar' },
+    { f: 'Windows Notify Email.wav',          n: 'Email' },
+    { f: 'chimes.wav', n: 'Chimes' },
+    { f: 'chord.wav',  n: 'Chord' },
+    { f: 'ding.wav',   n: 'Ding' },
+    { f: 'tada.wav',   n: 'Tada' }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const dot = $('dot'), label = $('label'), btnAway = $('btnAway'), btnHere = $('btnHere');
+  let cfg = { theme: 'light', glassAlpha: 45, position: 'top-right', sound: 0, volume: 70 };
+  let sndIdx = 0;
+
+  function applyCfg() {
+    document.documentElement.style.setProperty('--ga', (cfg.glassAlpha / 100).toFixed(2));
+    document.body.classList.toggle('dark', cfg.theme === 'dark');
+    $('alpha').value = cfg.glassAlpha;
+    $('thLight').classList.toggle('on', cfg.theme !== 'dark');
+    $('thDark').classList.toggle('on', cfg.theme === 'dark');
+    document.querySelectorAll('[data-pos]').forEach(b => b.classList.toggle('on', b.dataset.pos === cfg.position));
+    sndIdx = Math.min(Math.max(cfg.sound | 0, 0), SOUNDS.length - 1);
+    $('sndName').textContent = SOUNDS[sndIdx].n;
+    if (cfg.volume == null || isNaN(cfg.volume)) cfg.volume = 70;
+    $('vol').value = cfg.volume;
+  }
+  function save() { window.api.setConfig(cfg); }
+
+  function render(at) {
+    if (at) {
+      label.textContent = '在场';
+      dot.classList.remove('away');
+      btnHere.classList.add('active');
+      btnAway.classList.remove('active');
+    } else {
+      label.textContent = '离开中';
+      dot.classList.add('away');
+      btnAway.classList.add('active');
+      btnHere.classList.remove('active');
+    }
+  }
+
+  // presence
+  btnHere.addEventListener('click', async () => render(await window.api.setState(true)));
+  btnAway.addEventListener('click', async () => render(await window.api.setState(false)));
+  $('close').addEventListener('click', () => window.api.close());
+
+  // view switch (mousedown: more robust than click inside app-region windows)
+  $('gear').addEventListener('mousedown', openSettings);
+  $('gear').addEventListener('click', openSettings);
+  let viewTimer = null;
+  function openSettings() {
+    if (viewTimer) return; viewTimer = setTimeout(() => { viewTimer = null; }, 400);
+    $('mainView').style.display = 'none';
+    $('setView').style.display = 'block';
+    $('card').classList.add('settings');
+    window.api.setView(true);
+  }
+  $('back').addEventListener('mousedown', closeSettings);
+  $('back').addEventListener('click', closeSettings);
+  function closeSettings() {
+    $('mainView').style.display = 'block';
+    $('setView').style.display = 'none';
+    $('card').classList.remove('settings');
+    window.api.setView(false);
+  }
+
+  // settings controls
+  $('alpha').addEventListener('input', () => { cfg.glassAlpha = +$('alpha').value; applyCfg(); save(); });
+  $('thLight').addEventListener('click', () => { cfg.theme = 'light'; applyCfg(); save(); });
+  $('thDark').addEventListener('click', () => { cfg.theme = 'dark'; applyCfg(); save(); });
+  document.querySelectorAll('[data-pos]').forEach(b =>
+    b.addEventListener('click', () => { cfg.position = b.dataset.pos; applyCfg(); save(); window.api.setPos(cfg.position); }));
+  $('sndPrev').addEventListener('click', () => { sndIdx = (sndIdx + SOUNDS.length - 1) % SOUNDS.length; cfg.sound = sndIdx; applyCfg(); save(); });
+  $('sndNext').addEventListener('click', () => { sndIdx = (sndIdx + 1) % SOUNDS.length; cfg.sound = sndIdx; applyCfg(); save(); });
+
+  // preview: play in renderer (instant, no child process); fall back to main-process player
+  let audioEl = null;
+  let sndGuard = null;
+  function playPreview() {
+    const file = SOUNDS[sndIdx].f;
+    try {
+      if (audioEl) { audioEl.pause(); audioEl = null; }
+      audioEl = new Audio('file:///C:/Windows/Media/' + encodeURIComponent(file));
+      audioEl.volume = Math.min(Math.max((cfg.volume == null ? 70 : cfg.volume) / 100, 0), 1);
+      audioEl.play().catch(() => window.api.previewSound(file));
+    } catch (err) {
+      window.api.previewSound(file);
+    }
+  }
+  $('sndPlay').addEventListener('mousedown', () => { if (sndGuard) return; sndGuard = setTimeout(() => { sndGuard = null; }, 400); playPreview(); });
+  $('sndPlay').addEventListener('click', () => { if (sndGuard) return; sndGuard = setTimeout(() => { sndGuard = null; }, 400); playPreview(); });
+  $('vol').addEventListener('input', () => {
+    cfg.volume = +$('vol').value;
+    if (audioEl) audioEl.volume = Math.min(Math.max(cfg.volume / 100, 0), 1);  // adjust playing preview live
+    applyCfg(); save();
+  });
+
+  // init
+  window.api.getState().then(render);
+  window.api.getConfig().then(c => { if (c) { cfg = Object.assign(cfg, c); } applyCfg(); });
+</script>
+</body>
+</html>

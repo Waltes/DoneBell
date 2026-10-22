@@ -1,0 +1,40 @@
+{
+  "name": "donebell",
+  "productName": "DoneBell",
+  "version": "0.1.0",
+  "description": "Liquid-glass presence widget + completion chime for AI coding agents (Claude Code, Codex CLI, ...)",
+  "main": "main.js",
+  "bin": {
+    "donebell": "bin/donebell.js"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "app.donebell.widget",
+    "productName": "DoneBell",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "setround.ps1",
+      "notifier/**",
+      "bin/**"
+    ],
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "artifactName": "DoneBell-Setup-${version}.exe"
+    }
+  }
+}
